@@ -1,4 +1,117 @@
 # Changelog
+## Versão 3.4-alpha – Fase 1.8D – Espelho das Diferenças da Guia 4 na Guia 5 (30/07/2026)
+
+### Adicionado
+- Criada, na **Guia 5 – Atualização**, a seção **Diferenças da Guia 4**.
+- Adicionado o botão **Importar Diferenças da Guia 4**.
+- Criada a variável global:
+  - `window.diferencasAtualizacaoAtual`.
+- Criadas funções auxiliares para a Fase 1.8D:
+  - `formatarMoedaAtualizacao()`;
+  - `renderizarDiferencasAtualizacao()`;
+  - `importarDiferencasGuia4ParaAtualizacao()`;
+  - `limparDiferencasAtualizacao()`.
+- Implementada renderização, na Guia 5, de tabela com:
+  - Competência;
+  - Diferença Original.
+- Implementada importação manual das diferenças apuradas na Guia 4 por meio da função já existente:
+  - `coletarDiferencasParaAtualizacao()`.
+- Exposta globalmente a função:
+  - `window.importarDiferencasGuia4ParaAtualizacao`.
+- Exposta globalmente a função:
+  - `window.limparDiferencasAtualizacao`.
+
+### Alterado
+- Reordenada a **Guia 5 – Atualização** para a seguinte sequência:
+  1. Datas de Referência;
+  2. Parâmetros de Correção Monetária;
+  3. Parâmetros de Juros de Mora;
+  4. Diferenças da Guia 4;
+  5. Aviso de módulo em construção.
+- A seção **Diferenças da Guia 4** passou a exibir as competências e diferenças originais importadas da Guia 4.
+- Implementado reset automático das diferenças importadas quando houver alteração de dados nas Guias 1, 3 ou 4.
+- O reset automático limpa apenas as diferenças importadas, preservando:
+  - `window.parametrosCorrecaoAtual`;
+  - `window.parametrosJurosAtual`;
+  - `window.parametrosSelicAtual`;
+  - `statusCorrecao`;
+  - `statusJuros`;
+  - JSONs de parâmetros já carregados na Guia 5.
+- A mensagem de reset passou a informar:
+  - `Diferenças não importadas após alteração dos dados. Reimporte a Guia 4. Parâmetros de correção e juros mantidos.`
+- Ajustado o visual das competências no formato `13º/AAAA`, mantendo apenas o texto da competência em azul/negrito.
+- Adicionada zebra discreta à tabela de diferenças importadas na Guia 5.
+- Mantida a intercalação visual normal das linhas na Guia 4, inclusive nas competências `13º/AAAA`.
+
+### Corrigido
+- Corrigido o comportamento em que diferenças antigas permaneciam visíveis na Guia 5 após alteração dos dados de origem.
+- Corrigida a mensagem exibida ao tentar importar diferenças sem dados calculados na Guia 4.
+- Corrigido destaque visual indevido das linhas de `13º/AAAA`, removendo fundo, bordas e faixa de linha inteira.
+- Corrigido efeito visual em que linhas de `13º/AAAA` ficavam brancas e quebravam a zebra da tabela.
+- Corrigida a tabela da Guia 5 para exibir zebra discreta em branco/cinza claro.
+- Preservado o destaque visual apenas no texto da competência `13º/AAAA`.
+- Preservada a funcionalidade de importação de diferenças após alteração dos dados e novo cálculo.
+
+### Preservado
+- Nenhuma alteração em `data/indexadores.js`.
+- Nenhuma alteração em `data/indices.js`.
+- Nenhuma alteração em `js/diferencas.js`.
+- Nenhuma alteração em `js/app.js`.
+- Nenhuma alteração em `js/json.js`.
+- Nenhuma alteração em `js/motor-evolucao.js`.
+- Nenhuma alteração na lógica de cálculo das diferenças da Guia 4.
+- Nenhuma alteração no motor previdenciário.
+- Nenhuma alteração na estrutura do JSON do caso.
+- Nenhuma implementação de correção monetária.
+- Nenhuma implementação de juros de mora.
+- Nenhuma implementação de SELIC.
+- Nenhuma implementação de taxa legal.
+- Nenhuma implementação de fator acumulado.
+- Nenhuma implementação de valor atualizado final.
+- A função `adminImportarJSON(json)` permanece sem chamada final a `adminAtualizarSelectsIndice()`.
+
+### Homologação
+
+Testes aprovados:
+
+- Sistema abriu sem erro crítico no Console.
+- Guia 5 exibiu a seção **Diferenças da Guia 4**.
+- A ordem da Guia 5 ficou:
+  - Datas de Referência;
+  - Parâmetros de Correção Monetária;
+  - Parâmetros de Juros de Mora;
+  - Diferenças da Guia 4;
+  - Aviso de módulo em construção.
+- Botão **Importar Diferenças da Guia 4** apareceu corretamente.
+- Ao clicar em **Importar Diferenças da Guia 4** sem dados na Guia 4, o sistema exibiu aviso adequado.
+- Após calcular a Guia 4, a Guia 5 importou as competências e diferenças originais.
+- Competências mensais foram importadas corretamente.
+- Competências `13º/AAAA` foram importadas corretamente.
+- O texto da competência `13º/AAAA` ficou azul/negrito, sem destaque de linha inteira.
+- A Guia 4 manteve a zebra visual normal nas linhas mensais e nas linhas de `13º/AAAA`.
+- A Guia 5 passou a exibir zebra discreta na tabela de diferenças importadas.
+- Ao alterar dados nas Guias 1, 3 ou 4, as diferenças importadas na Guia 5 foram limpas automaticamente.
+- O reset automático preservou os parâmetros de correção monetária e juros já carregados.
+- `window.diferencasAtualizacaoAtual` foi limpo e recriado corretamente conforme nova importação.
+- Reimportar as diferenças após alteração dos dados trouxe a nova quantidade correta de competências.
+- Botões **Carregar JSON de Correção** e **Carregar JSON de Juros** continuaram funcionando.
+- Modal administrativo continuou abrindo por `CTRL + SHIFT + E`.
+- Importação e exportação do JSON do caso continuaram funcionando.
+- Guia 4 permaneceu funcional.
+- Motor de evolução previdenciária permaneceu funcional.
+- Nenhum cálculo financeiro foi implementado nesta fase.
+
+### Observação Técnica
+Esta fase criou apenas o espelho das diferenças apuradas na Guia 4 dentro da Guia 5.  
+A Guia 5 ainda não realiza atualização monetária, juros de mora, SELIC, taxa legal, fator acumulado ou cálculo financeiro.
+
+As diferenças importadas em `window.diferencasAtualizacaoAtual` servem como base preparatória para fase futura de atualização monetária.  
+Quando dados de origem são alterados nas Guias 1, 3 ou 4, apenas as diferenças importadas são invalidadas, mantendo preservados os parâmetros de correção monetária e juros já carregados.
+
+A melhoria visual de separadores anuais, linhas de grade discretas, controle de fonte, contraste e modal de preferências de exibição foi registrada para fase futura de UX, sem implementação nesta fase.
+
+---
+
 ## Versão 3.4-alpha – Fase 1.8C – Integração da Tela Administrativa com a Base de Indexadores (30/07/2026)
 
 ### Adicionado
