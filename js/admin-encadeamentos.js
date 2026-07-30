@@ -855,7 +855,6 @@ function renderizarDiferencasAtualizacao(dados) {
         return;
     }
 
-    // Ordena por competência
     var dadosOrdenados = dados.slice().sort(function(a, b) {
         var aIs13 = a.competencia.indexOf('13º') === 0;
         var bIs13 = b.competencia.indexOf('13º') === 0;
@@ -883,22 +882,17 @@ function renderizarDiferencasAtualizacao(dados) {
         tr.className = 'border-b border-slate-200 hover:bg-slate-50';
 
         var is13 = item.competencia.indexOf('13º') === 0;
+        if (is13) {
+            // Aplica classe para destaque via CSS, mas SEM forçar fundo
+            tr.classList.add('linha-13');
+        }
 
-        // ---- Correção visual: sem fundo/borda na linha ----
-        // Removido: tr.classList.add('linha-13');
-        // Removido: tr.style.backgroundColor = '#f0f9ff';
-
-        // Coluna Competência
         var tdComp = document.createElement('td');
         tdComp.className = 'p-2 font-semibold text-slate-800';
         tdComp.textContent = item.competencia;
-        if (is13) {
-            tdComp.style.color = '#1e40af';
-            tdComp.style.fontWeight = '700';
-        }
+        // O destaque da primeira célula será feito via CSS .linha-13 td:first-child
         tr.appendChild(tdComp);
 
-        // Coluna Diferença Original
         var tdDiff = document.createElement('td');
         tdDiff.className = 'p-2 text-right font-mono';
         tdDiff.textContent = formatarMoedaAtualizacao(item.diferenca);
