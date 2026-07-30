@@ -528,21 +528,41 @@
     color: #1e40af;
 }
 
+/* ===================================================================== */
 /* ===== LINHA DE 13º SALÁRIO – APENAS TEXTO DESTACADO ===== */
+/* ===================================================================== */
+/* CORREÇÃO VISUAL: NÃO força fundo ou borda na linha inteira */
+/* A classe .linha-13 apenas aplica estilo à primeira célula (Competência) */
 .linha-13 td:first-child {
     font-weight: 700;
     color: #1e40af;
 }
 
-/* Remove qualquer fundo ou borda que tenha sido aplicado à linha inteira */
-.linha-13 {
-    background-color: transparent !important;
-    border-top: none !important;
-    border-bottom: none !important;
+/* ===================================================================== */
+/* ===== GUIA 5 – TABELA DE DIFERENÇAS IMPORTADAS (Fase 1.8D) ===== */
+/* ===================================================================== */
+
+/* Zebra discreta */
+#corpoDiferencasAtualizacao tr:nth-child(even) {
+    background-color: #f8fafc;
 }
 
-#corpoDiferencasAtualizacao .linha-13 {
-    background-color: transparent !important;
+#corpoDiferencasAtualizacao tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+#corpoDiferencasAtualizacao tr:hover {
+    background-color: #f1f5f9 !important;
+}
+
+/* A classe .linha-13 na Guia 5 NÃO força fundo ou borda */
+#corpoDiferencasAtualizacao .linha-13 td:first-child {
+    font-weight: 700;
+    color: #1e40af;
+}
+
+#statusDiferencas {
+    white-space: pre-wrap;
 }
 
 #statusCorrecao, #statusJuros {
