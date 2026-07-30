@@ -1,11 +1,9 @@
 // =====================================================================
-// ADMINISTRAÇÃO DE ENCADEAMENTOS – Fase 1.8C (VERSÃO FINAL)
+// ADMINISTRAÇÃO DE ENCADEAMENTOS – Fase 1.8D (1.8C + espelho Guia 4)
 // =====================================================================
 // Gerencia criação, validação, importação/exportação de JSONs de parâmetros
 // de correção monetária e juros de mora.
-// Índices obtidos dinamicamente de window.INDEXADORES_ATUALIZACAO.
-// Preserva índices importados mesmo se incompatíveis (com aviso),
-// mas substitui automaticamente na criação/manual ao mudar tipo.
+// Fase 1.8D: importação e exibição das diferenças da Guia 4 na Guia 5.
 // =====================================================================
 
 window.parametrosCorrecaoAtual = null;
@@ -711,7 +709,7 @@ function adminImportarJSON(json) {
     // Não chamar adminAtualizarSelectsIndice() aqui.
     // As linhas importadas já foram criadas com preservarIncompativel = true.
     // Chamar adminAtualizarSelectsIndice() aqui pode substituir índices incompatíveis preservados.
-    }
+}
 
 // =====================================================================
 // FUNÇÃO PARA CARREGAR PARÂMETROS NA GUIA 5
@@ -837,6 +835,132 @@ function coletarDiferencasParaAtualizacao() {
 }
 
 // =====================================================================
+// FASE 1.8D – ESPELHO DAS DIFERENÇAS DA GUIA 4 NA GUIA 5
+// =====================================================================
+
+window.diferencasAtualizacaoAtual = null;
+
+function formatarMoedaAtualizacao(valor) {
+    if (valor === null || valor === undefined || isNaN(valor)) return 'R$ 0,00';
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function renderizarDiferencasAtualizacao(dados) {
+    var container = document.getElementById('containerTabelaDiferencas');
+    var tbody = document.getElementById('corpoDiferencasAtualizacao');
+    var status = document.getElementById('statusDiferencas');
+
+    if (!container || !tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (!dados || dados.length === 0) {
+        container.classList.add('hidden');
+        if (status) {
+            status.textContent = 'Nenhuma diferença importada.';
+            status.className = 'text-sm text-slate-500';
+        }
+        return;
+    }
+
+    // Ordena por competência (mesmo que a Guia 4 já esteja ordenada, garantimos)
+    var dadosOrdenados = dados.slice().sort(function(a, b) {
+        var aIs13 = a.competencia.indexOf('13º') === 0;
+        var bIs13 = b.competencia.indexOf('13º') === 0;
+
+        var aNum, bNum;
+        if (aIs13) {
+            var aAno = parseInt(a.competencia.split('/')[1], 10);
+            aNum = aAno * 100 + 13;
+        } else {
+            var aPartes = a.competencia.split('/');
+            aNum = parseInt(aPartes[1], 10) * 100 + parseInt(aPartes[0], 10);
+        }
+        if (bIs13) {
+            var bAno = parseInt(b.competencia.split('/')[1], 10);
+            bNum = bAno * 100 + 13;
+        } else {
+            var bPartes = b.competencia.split('/');
+            bNum = parseInt(bPartes[1], 10) * 100 + parseInt(bPartes[0], 10);
+        }
+        return aNum - bNum;
+    });
+
+    dadosOrdenados.forEach(function(item) {
+        var tr = document.createElement('tr');
+        tr.className = 'border-b border-slate-200 hover:bg-slate-50';
+
+        var is13 = item.competencia.indexOf('13º') === 0;
+        if (is13) {
+            tr.classList.add('linha-13');
+            tr.style.backgroundColor = '#f0f9ff';
+        }
+
+        var tdComp = document.createElement('td');
+        tdComp.className = 'p-2 font-semibold text-slate-800';
+        tdComp.textContent = item.competencia;
+        if (is13) {
+            tdComp.style.color = '#1e40af';
+        }
+        tr.appendChild(tdComp);
+
+        var tdDiff = document.createElement('td');
+        tdDiff.className = 'p-2 text-right font-mono';
+        tdDiff.textContent = formatarMoedaAtualizacao(item.diferenca);
+        if (item.diferenca < 0) {
+            tdDiff.style.color = '#dc2626';
+        } else if (item.diferenca > 0) {
+            tdDiff.style.color = '#16a34a';
+        }
+        tr.appendChild(tdDiff);
+
+        tbody.appendChild(tr);
+    });
+
+    container.classList.remove('hidden');
+    if (status) {
+        status.textContent = '✅ ' + dados.length + ' diferença(s) importada(s) da Guia 4.';
+        status.className = 'text-sm text-green-700';
+    }
+}
+
+function importarDiferencasGuia4ParaAtualizacao() {
+    var status = document.getElementById('statusDiferencas');
+
+    // Verifica se a Guia 4 está montada
+    var rows = document.querySelectorAll('#corpoDiferencas tr');
+    if (rows.length === 0 || (rows.length === 1 && rows[0].textContent.indexOf('Nenhuma diferença') !== -1)) {
+        if (status) {
+            status.textContent = '⚠️ Nenhuma diferença encontrada. Calcule a Guia 4 antes de importar.';
+            status.className = 'text-sm text-amber-700';
+        }
+        window.diferencasAtualizacaoAtual = null;
+        renderizarDiferencasAtualizacao(null);
+        return;
+    }
+
+    var dados = coletarDiferencasParaAtualizacao();
+
+    if (!dados || dados.length === 0) {
+        if (status) {
+            status.textContent = '⚠️ Nenhuma diferença com valor válido encontrada.';
+            status.className = 'text-sm text-amber-700';
+        }
+        window.diferencasAtualizacaoAtual = null;
+        renderizarDiferencasAtualizacao(null);
+        return;
+    }
+
+    window.diferencasAtualizacaoAtual = dados;
+    renderizarDiferencasAtualizacao(dados);
+
+    if (status) {
+        status.textContent = '✅ ' + dados.length + ' diferença(s) importada(s) da Guia 4.';
+        status.className = 'text-sm text-green-700';
+    }
+}
+
+// =====================================================================
 // SINCRONIZAÇÃO DAS DATAS DA GUIA 1 PARA GUIA 5
 // =====================================================================
 
@@ -916,6 +1040,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Fase 1.8D – Botão Importar Diferenças
+    var btnImportarDiferencas = document.getElementById('btnImportarDiferencas');
+    if (btnImportarDiferencas) {
+        btnImportarDiferencas.addEventListener('click', function() {
+            importarDiferencasGuia4ParaAtualizacao();
+        });
+    }
+
     document.querySelectorAll('.nav-guia button').forEach(function(btn) {
         btn.addEventListener('click', function() {
             if (this.dataset.guia === 'atualizacao') {
@@ -931,4 +1063,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.coletarDiferencasParaAtualizacao = coletarDiferencasParaAtualizacao;
     window.sincronizarParametrosAtualizacao = sincronizarParametrosAtualizacao;
+    window.importarDiferencasGuia4ParaAtualizacao = importarDiferencasGuia4ParaAtualizacao;
 });
