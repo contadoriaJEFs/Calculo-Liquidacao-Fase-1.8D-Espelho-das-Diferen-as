@@ -1,14 +1,16 @@
 // =====================================================================
-// ADMINISTRAÇÃO DE ENCADEAMENTOS – Fase 1.8D (1.8C + espelho Guia 4)
+// ADMINISTRAÇÃO DE ENCADEAMENTOS – Fase 1.8D (CORREÇÕES)
 // =====================================================================
-// Gerencia criação, validação, importação/exportação de JSONs de parâmetros
-// de correção monetária e juros de mora.
-// Fase 1.8D: importação e exibição das diferenças da Guia 4 na Guia 5.
+// Fase 1.8C + Fase 1.8D com ajustes:
+// - Ordem da Guia 5 ajustada no HTML (não afeta este JS)
+// - Avanço de limpeza automática das diferenças quando dados de origem mudam
+// - Função limparDiferencasAtualizacao exposta globalmente
 // =====================================================================
 
 window.parametrosCorrecaoAtual = null;
 window.parametrosJurosAtual = null;
 window.parametrosSelicAtual = null;
+window.diferencasAtualizacaoAtual = null;
 
 // =====================================================================
 // AUXILIARES
@@ -237,7 +239,7 @@ function vincularEventosModal() {
     });
 
     document.getElementById('adminAdicionarLinha').addEventListener('click', function() {
-        adminAdicionarLinhaPeriodo(); // preservarIncompativel = false (padrão)
+        adminAdicionarLinhaPeriodo();
     });
 
     document.getElementById('adminTipoParametro').addEventListener('change', function() {
@@ -317,17 +319,14 @@ function adminCriarSelectIndice(valorAtual, preservarIncompativel) {
     var existeNaBase = adminIndiceExisteNaBase(valorAtual);
     var compativel = adminIndiceCompativelComTipo(valorAtual, tipoAtual);
 
-    // Caso especial: preservar incompatível (importação)
     if (preservarIncompativel && valorAtual && existeNaBase && !compativel) {
         html += '<option value="' + valorAtual + '" selected>' + valorAtual + ' (incompatível com ' + tipoAtual + ')</option>';
     }
 
-    // Caso: índice não existe na base
     if (valorAtual && !existeNaBase) {
         html += '<option value="' + valorAtual + '" selected>' + valorAtual + ' (não cadastrado na base)</option>';
     }
 
-    // Índices compatíveis
     if (indices.length === 0) {
         html += '<option value="">-- Nenhum índice disponível --</option>';
     } else {
@@ -392,7 +391,6 @@ function adminAtualizarSelectsIndice() {
         var existeNaBase = adminIndiceExisteNaBase(valorAtual);
         var compativel = adminIndiceCompativelComTipo(valorAtual, tipoAtual);
 
-        // Se o índice existe na base mas não é compatível, NÃO preservar (substitui)
         if (existeNaBase && !compativel) {
             var options = '';
             if (indices.length === 0) {
@@ -408,7 +406,6 @@ function adminAtualizarSelectsIndice() {
             return;
         }
 
-        // Se o índice não existe na base, preserva como opção especial (mesmo em mudança de tipo)
         var existeNaLista = indices.some(function(item) {
             return item.codigo === valorAtual;
         });
@@ -680,7 +677,6 @@ function adminImportarJSON(json) {
     var tbody = document.getElementById('adminTabelaPeriodos');
     tbody.innerHTML = '';
 
-    // Importação: preservar índices incompatíveis.
     json.periodos.forEach(function(p) {
         adminAdicionarLinhaPeriodo(p.indice, p.inicio, p.fim || '', true);
     });
@@ -706,9 +702,7 @@ function adminImportarJSON(json) {
         (indicesNaoEncontrados.length > 0 || indicesTipoIncompativel.length > 0) ? 'warning' : 'success'
     );
 
-    // Não chamar adminAtualizarSelectsIndice() aqui.
-    // As linhas importadas já foram criadas com preservarIncompativel = true.
-    // Chamar adminAtualizarSelectsIndice() aqui pode substituir índices incompatíveis preservados.
+    // NÃO chamar adminAtualizarSelectsIndice() aqui.
 }
 
 // =====================================================================
@@ -838,8 +832,6 @@ function coletarDiferencasParaAtualizacao() {
 // FASE 1.8D – ESPELHO DAS DIFERENÇAS DA GUIA 4 NA GUIA 5
 // =====================================================================
 
-window.diferencasAtualizacaoAtual = null;
-
 function formatarMoedaAtualizacao(valor) {
     if (valor === null || valor === undefined || isNaN(valor)) return 'R$ 0,00';
     return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -863,7 +855,6 @@ function renderizarDiferencasAtualizacao(dados) {
         return;
     }
 
-    // Ordena por competência (mesmo que a Guia 4 já esteja ordenada, garantimos)
     var dadosOrdenados = dados.slice().sort(function(a, b) {
         var aIs13 = a.competencia.indexOf('13º') === 0;
         var bIs13 = b.competencia.indexOf('13º') === 0;
@@ -924,40 +915,56 @@ function renderizarDiferencasAtualizacao(dados) {
     }
 }
 
+function limparDiferencasAtualizacao(mensagem) {
+    var container = document.getElementById('containerTabelaDiferencas');
+    var tbody = document.getElementById('corpoDiferencasAtualizacao');
+    var status = document.getElementById('statusDiferencas');
+
+    // Limpa a variável global
+    window.diferencasAtualizacaoAtual = null;
+
+    // Limpa o tbody
+    if (tbody) {
+        tbody.innerHTML = '';
+    }
+
+    // Oculta o container
+    if (container) {
+        container.classList.add('hidden');
+    }
+
+    // Atualiza o status
+    if (status) {
+        if (mensagem) {
+            status.textContent = mensagem;
+            status.className = 'text-sm text-amber-700';
+        } else {
+            status.textContent = 'Nenhuma diferença importada.';
+            status.className = 'text-sm text-slate-500';
+        }
+    }
+}
+
 function importarDiferencasGuia4ParaAtualizacao() {
     var status = document.getElementById('statusDiferencas');
 
     // Verifica se a Guia 4 está montada
     var rows = document.querySelectorAll('#corpoDiferencas tr');
     if (rows.length === 0 || (rows.length === 1 && rows[0].textContent.indexOf('Nenhuma diferença') !== -1)) {
-        if (status) {
-            status.textContent = '⚠️ Nenhuma diferença encontrada. Calcule a Guia 4 antes de importar.';
-            status.className = 'text-sm text-amber-700';
-        }
-        window.diferencasAtualizacaoAtual = null;
-        renderizarDiferencasAtualizacao(null);
+        // Limpa e exibe aviso
+        limparDiferencasAtualizacao('⚠️ Nenhuma diferença encontrada. Calcule a Guia 4 antes de importar.');
         return;
     }
 
     var dados = coletarDiferencasParaAtualizacao();
 
     if (!dados || dados.length === 0) {
-        if (status) {
-            status.textContent = '⚠️ Nenhuma diferença com valor válido encontrada.';
-            status.className = 'text-sm text-amber-700';
-        }
-        window.diferencasAtualizacaoAtual = null;
-        renderizarDiferencasAtualizacao(null);
+        limparDiferencasAtualizacao('⚠️ Nenhuma diferença com valor válido encontrada.');
         return;
     }
 
     window.diferencasAtualizacaoAtual = dados;
     renderizarDiferencasAtualizacao(dados);
-
-    if (status) {
-        status.textContent = '✅ ' + dados.length + ' diferença(s) importada(s) da Guia 4.';
-        status.className = 'text-sm text-green-700';
-    }
 }
 
 // =====================================================================
@@ -985,6 +992,7 @@ function sincronizarParametrosAtualizacao() {
 document.addEventListener('DOMContentLoaded', function() {
     criarModalAdmin();
 
+    // Atalho CTRL+SHIFT+E
     document.addEventListener('keydown', function(e) {
         var tag = e.target.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -1010,6 +1018,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Botões da Guia 5
     var btnCorrecao = document.getElementById('btnCarregarCorrecao');
     var fileCorrecao = document.getElementById('fileInputCorrecao');
     if (btnCorrecao && fileCorrecao) {
@@ -1040,7 +1049,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Fase 1.8D – Botão Importar Diferenças
+    // Botão Importar Diferenças
     var btnImportarDiferencas = document.getElementById('btnImportarDiferencas');
     if (btnImportarDiferencas) {
         btnImportarDiferencas.addEventListener('click', function() {
@@ -1048,6 +1057,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // ============================================================
+    // LISTENERS PARA RESET AUTOMÁTICO DAS DIFERENÇAS
+    // ============================================================
+    function configurarListenerReset(containerId, eventos) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        eventos.forEach(function(evt) {
+            container.addEventListener(evt, function(e) {
+                // Ignora mudanças na própria Guia 5
+                if (containerId === 'guia-atualizacao') return;
+                // Se houver dados importados, limpa
+                if (window.diferencasAtualizacaoAtual) {
+                    limparDiferencasAtualizacao(
+                        '⚠️ Diferenças não importadas após alteração dos dados. Reimporte a Guia 4. Parâmetros de correção e juros mantidos.'
+                    );
+                }
+            }, true);
+        });
+    }
+
+    // Guia 1 – Entradas
+    configurarListenerReset('guia-entradas', ['input', 'change']);
+
+    // Guia 3 – Benefícios Recebidos
+    configurarListenerReset('guia-beneficios-recebidos', ['input', 'change']);
+
+    // Guia 4 – Diferenças (modo de compensação, edições manuais, etc.)
+    configurarListenerReset('guia-diferencas', ['input', 'change']);
+
+    // Sincroniza datas ao entrar na Guia 5
     document.querySelectorAll('.nav-guia button').forEach(function(btn) {
         btn.addEventListener('click', function() {
             if (this.dataset.guia === 'atualizacao') {
@@ -1061,7 +1100,9 @@ document.addEventListener('DOMContentLoaded', function() {
         sincronizarParametrosAtualizacao();
     }
 
+    // Exposição global
     window.coletarDiferencasParaAtualizacao = coletarDiferencasParaAtualizacao;
     window.sincronizarParametrosAtualizacao = sincronizarParametrosAtualizacao;
     window.importarDiferencasGuia4ParaAtualizacao = importarDiferencasGuia4ParaAtualizacao;
+    window.limparDiferencasAtualizacao = limparDiferencasAtualizacao;
 });
