@@ -528,16 +528,21 @@
     color: #1e40af;
 }
 
-/* ===== LINHA DE 13º SALÁRIO ===== */
+/* ===== LINHA DE 13º SALÁRIO – APENAS TEXTO DESTACADO ===== */
 .linha-13 td:first-child {
     font-weight: 700;
     color: #1e40af;
 }
-/* REMOVIDA A ESTRELA */
+
+/* Remove qualquer fundo ou borda que tenha sido aplicado à linha inteira */
 .linha-13 {
-    background-color: #f0f9ff !important;
-    border-top: 2px solid #93c5fd;
-    border-bottom: 2px solid #93c5fd;
+    background-color: transparent !important;
+    border-top: none !important;
+    border-bottom: none !important;
+}
+
+#corpoDiferencasAtualizacao .linha-13 {
+    background-color: transparent !important;
 }
 
 #statusCorrecao, #statusJuros {
