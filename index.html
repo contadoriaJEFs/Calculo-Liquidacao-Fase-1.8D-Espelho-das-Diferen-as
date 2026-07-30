@@ -510,14 +510,14 @@
             </div>
 
             <!-- ============================================================ -->
-            <!-- GUIA 5 – ATUALIZAÇÃO (CORRIGIDA + Fase 1.8D)                -->
+            <!-- GUIA 5 – ATUALIZAÇÃO (ORDEM AJUSTADA)                        -->
             <!-- ============================================================ -->
             <div class="conteudo-guia" id="guia-atualizacao">
                 <!-- Campos hidden para compatibilidade com json.js -->
                 <input type="hidden" id="criterioCorrecao" value="">
                 <input type="hidden" id="criterioJuros" value="">
 
-                <!-- Datas de Referência -->
+                <!-- 1. Datas de Referência -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">📅 Datas de Referência</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -536,9 +536,31 @@
                     </div>
                 </div>
 
-                <!-- ============================================================ -->
-                <!-- NOVA SEÇÃO: DIFERENÇAS DA GUIA 4 (Fase 1.8D)                 -->
-                <!-- ============================================================ -->
+                <!-- 2. Parâmetros de Correção Monetária -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mt-4">
+                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">📈 Parâmetros de Correção Monetária</h4>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button id="btnCarregarCorrecao" class="w-56 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold shadow transition">
+                            Carregar JSON de Correção
+                        </button>
+                        <input type="file" id="fileInputCorrecao" accept=".json" class="hidden">
+                        <div id="statusCorrecao" class="text-sm text-slate-500">Nenhum arquivo carregado.</div>
+                    </div>
+                </div>
+
+                <!-- 3. Parâmetros de Juros de Mora -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mt-4">
+                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">📉 Parâmetros de Juros de Mora</h4>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button id="btnCarregarJuros" class="w-56 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold shadow transition">
+                            Carregar JSON de Juros
+                        </button>
+                        <input type="file" id="fileInputJuros" accept=".json" class="hidden">
+                        <div id="statusJuros" class="text-sm text-slate-500">Nenhum arquivo carregado.</div>
+                    </div>
+                </div>
+
+                <!-- 4. Diferenças da Guia 4 -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mt-4">
                     <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">📊 Diferenças da Guia 4</h4>
                     <div class="flex flex-wrap items-center gap-3">
@@ -564,30 +586,7 @@
                     </div>
                 </div>
 
-                <!-- Bloco de Correção Monetária -->
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mt-4">
-                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">📈 Parâmetros de Correção Monetária</h4>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <button id="btnCarregarCorrecao" class="w-56 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold shadow transition">
-                            Carregar JSON de Correção
-                        </button>
-                        <input type="file" id="fileInputCorrecao" accept=".json" class="hidden">
-                        <div id="statusCorrecao" class="text-sm text-slate-500">Nenhum arquivo carregado.</div>
-                    </div>
-                </div>
-
-                <!-- Bloco de Juros de Mora -->
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mt-4">
-                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">📉 Parâmetros de Juros de Mora</h4>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <button id="btnCarregarJuros" class="w-56 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold shadow transition">
-                            Carregar JSON de Juros
-                        </button>
-                        <input type="file" id="fileInputJuros" accept=".json" class="hidden">
-                        <div id="statusJuros" class="text-sm text-slate-500">Nenhum arquivo carregado.</div>
-                    </div>
-                </div>
-
+                <!-- 5. Aviso de módulo em construção -->
                 <div class="mt-4 bg-amber-50 border-l-4 border-amber-400 p-4 rounded-md text-sm text-amber-800">
                     <strong>🛠️ Módulo em construção.</strong><br>
                     A atualização monetária e juros serão implementados em fases futuras.
